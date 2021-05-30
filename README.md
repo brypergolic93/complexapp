@@ -1,0 +1,1 @@
+This is the main application built in the Udemy Fullstack JS course.
