@@ -39,7 +39,7 @@ User.prototype.login = function() {
             if (attemptedUser && bcrypt.compareSync(this.userData.password, attemptedUser.password)) {
                 resolve("Congrats!")
             } else {
-                reject("Invalid username or password")
+                reject("Invalid username or password.")
             }
         }).catch(function() {
             reject("Database server is down. Please try again later.")

@@ -1,6 +1,7 @@
 const express = require('express')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
+const flash = require('connect-flash')
 const app = express()
 
 let sessionOptions = session({
@@ -25,6 +26,7 @@ app.set('views', 'views')
 app.set('view engine', 'ejs')
 
 app.use(sessionOptions)
+app.use(flash())
 
 // use the variable exported in Router
 app.use('/', router)
