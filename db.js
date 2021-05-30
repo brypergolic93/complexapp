@@ -4,7 +4,7 @@ const mongodb = require('mongodb')
 
 mongodb.connect(process.env.CONNECTIONSTRING, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
     // export the database object we want
-    module.exports = client.db()
+    module.exports = client
     // require the express application
     const app = require('./app')
     // once the database connection is established, open up the express application and listen on the port below
