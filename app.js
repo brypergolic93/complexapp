@@ -12,6 +12,16 @@ let sessionOptions = session({
     cookie: {maxAge: 1000 * 60 * 60 * 24, httpOnly: true}
 })
 
+app.use(sessionOptions)
+app.use(flash())
+
+// Middleware. Express will run this before every express before the router
+app.use(function(req, res, next) {
+    // Locals is an object available to any .ejs files
+    res.locals.user = req.session.sessionUser
+    next()
+})
+
 const router = require('./router.js')
 
 // tell express to add user submitted data onto request object
@@ -25,8 +35,6 @@ app.use(express.static('public'))
 app.set('views', 'views')
 app.set('view engine', 'ejs')
 
-app.use(sessionOptions)
-app.use(flash())
 
 // use the variable exported in Router
 app.use('/', router)
