@@ -16,7 +16,7 @@ exports.mustBeLoggedIn = function(req, res, next) {
 exports.login = function(req, res) {
     let user = new User(req.body)
     user.login().then(function() {
-        req.session.sessionUser = {avatar: user.avatar, username: user.userData.username}
+        req.session.sessionUser = {avatar: user.avatar, username: user.userData.username, _id: user.userData._id}
         req.session.save(function() {
             res.redirect('/')
         })
@@ -39,7 +39,7 @@ exports.register = function(req, res) {
     // new creates a new empty object.
     let user = new User(req.body)
     user.register().then(() => {
-        req.session.user = {username: user.userData.username, avatar: user.avatar}
+        req.session.user = {username: user.userData.username, avatar: user.avatar, _id: user.userData._id}
         req.session.save(function() {
             res.redirect('/')
         })
