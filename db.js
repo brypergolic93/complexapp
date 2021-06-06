@@ -10,4 +10,5 @@ mongodb.connect(process.env.CONNECTIONSTRING, {useNewUrlParser: true, useUnified
     const app = require('./app')
     // once the database connection is established, open up the express application and listen on the port below
     app.listen(process.env.PORT)
+    console.log('Listening on localhost:' + process.env.PORT)
 })
