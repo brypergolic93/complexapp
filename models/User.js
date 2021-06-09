@@ -3,10 +3,13 @@ const usersCollection = require('../db').db().collection("users")
 const validator = require('validator')
 const md5 = require('md5')
 
-let User = function(data) {
+let User = function(data, getAvatar) {
     // take the data passed in via the parameter, then storing it in this property
     this.userData = data
     this.errors = []
+    // In the Post model, if true is passed into user, we run return the get avatar method onto user
+    if (getAvatar == undefined) { getAvatar = false } 
+    if (getAvatar) {this.getAvatar()}
 }
 
 User.prototype.cleanUp = function() {
