@@ -16,10 +16,12 @@ exports.create = function(req, res) {
 }
 
 exports.viewSingle = async function(req, res) {
+    
     try {
         let userPost = await Post.findSingleById(req.params.id)
         res.render('single-post-screen', {post: userPost} )
     } catch {
+        
         res.render('404')
     }
 }

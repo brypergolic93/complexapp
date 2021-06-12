@@ -96,4 +96,30 @@ User.prototype.getAvatar = function() {
     this.avatar = `https://gravatar.com/avatar/${md5(this.userData.email)}?s=128`
 }
 
+// Find the user matching the username in the URL
+User.findByUsername = function(urlUsername) {
+    return new Promise(function(resolve, reject) {
+        if (typeof urlUsername != "string") {
+            reject()
+            return
+        } 
+        usersCollection.findOne({username: urlUsername}).then(function(userDoc) {
+            if (userDoc) {
+                userDoc = new User(userDoc, true)
+                userDoc = {
+                    _id: userDoc.userData._id,
+                    username: userDoc.userData.username,
+                    avatar: userDoc.avatar
+                }
+                resolve(userDoc)
+            } else {
+                reject()
+            }
+
+        }).catch(function() {
+            reject()
+        })
+    })
+}
+
 module.exports = User
