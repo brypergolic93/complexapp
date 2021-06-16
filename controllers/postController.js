@@ -7,7 +7,6 @@ exports.viewCreateScreen = function(req, res) {
 exports.create = function(req, res) {
     let post = new Post(req.body, req.session.sessionUser._id)
     post.create().then(function() {
-        
         res.send("New post created")
     }).catch(function(errors) {
 
@@ -18,10 +17,19 @@ exports.create = function(req, res) {
 exports.viewSingle = async function(req, res) {
     
     try {
-        let userPost = await Post.findSingleById(req.params.id)
+        let userPost = await Post.findSingleById(req.params.id, req.visitorId)
         res.render('single-post-screen', {post: userPost} )
     } catch {
         
+        res.render('404')
+    }
+}
+
+exports.viewEditScreen = async function(req, res) {
+    try {
+        let userPost = await Post.findSingleById(req.params.id)
+        res.render('edit-post', {post: userPost})
+    } catch {
         res.render('404')
     }
 }

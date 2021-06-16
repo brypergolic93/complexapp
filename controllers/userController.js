@@ -67,7 +67,6 @@ exports.ifUserExists = function(req, res, next) {
         req.profileUser = userDocument
         next()
     }).catch(function() {
-
         res.render('404')
     })
 }

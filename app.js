@@ -17,7 +17,11 @@ app.use(flash())
 
 // Middleware. Express will run this before every express before the router
 app.use(function(req, res, next) {
-    // Locals is an object available to any .ejs files
+
+    // make current user id available on the req object
+    if (req.session.sessionUser) {req.visitorId = req.session.sessionUser._id } else {req.visitorId = 0}
+
+    // Make user data available to any .ejs files
     res.locals.user = req.session.sessionUser
     next()
 })

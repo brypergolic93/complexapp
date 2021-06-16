@@ -47,7 +47,7 @@ Post.prototype.create = function() {
         
 }
 
-Post.reusablePostQuery = function(uniqueOperations) {
+Post.reusablePostQuery = function(uniqueOperations, visitorId) {
     return new Promise(async function(resolve, reject) {
         
         let aggOperations = uniqueOperations.concat([
@@ -56,6 +56,7 @@ Post.reusablePostQuery = function(uniqueOperations) {
                 title: 1,
                 body: 1,
                 createdDate: 1,
+                authorId: "$author",
                 author: {$arrayElemAt: ["$authorDocument", 0]}
             }}
         ])
@@ -64,6 +65,8 @@ Post.reusablePostQuery = function(uniqueOperations) {
 
         // Clean up author property in each post object
         posts = posts.map(function(post) {
+            post.isVisitorOwner = post.authorId.equals(visitorId)
+            
             post.author = {
                 username: post.author.username,
                 // create a new instance of the user object, sending true to run the getAvatar function in the User model
@@ -76,7 +79,7 @@ Post.reusablePostQuery = function(uniqueOperations) {
     })
 }
 
-Post.findSingleById = function(id) {
+Post.findSingleById = function(id, visitorId) {
     
     return new Promise(async function(resolve, reject) {
         
@@ -87,7 +90,7 @@ Post.findSingleById = function(id) {
         
         let posts = await Post.reusablePostQuery([
             { $match: {_id: new ObjectID(id)} }
-        ])
+        ], visitorId)
         
         if (posts.length) {
             resolve(posts[0])
