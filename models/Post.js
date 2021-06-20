@@ -2,11 +2,15 @@ const postsCollection = require('../db').db().collection('posts')
 const ObjectID = require('mongodb').ObjectID
 const User = require('./User')
 
-let Post = function(data, userid) {
+let Post = function(data, userid, requestedPostId) {
     this.formData = data 
     this.errors = []
     this.sessionUserId = userid
+    this.requestedPostId = requestedPostId
 }
+
+
+
 
 Post.prototype.cleanUp = function() {
     if (typeof(this.formData.title) != "string") {this.data.title = ""}
@@ -47,6 +51,39 @@ Post.prototype.create = function() {
         
 }
 
+Post.prototype.update = function() {
+    return new Promise(async (resolve, reject) => {
+        try {
+            
+            let post = await Post.findSingleById(this.requestedPostId, this.sessionUserId)
+
+            if (post.isVisitorOwner) {
+                // update db
+                let status = await this.actuallyUpdate()
+                
+                resolve(status)
+            } else {
+                reject()
+            }
+        } catch {
+            reject()
+        }
+    })
+}
+
+Post.prototype.actuallyUpdate = function() {
+    return new Promise(async (resolve, reject) => {
+        this.cleanUp()
+        this.validate()
+        if (!this.errors.length) {
+            postsCollection.findOneAndUpdate({_id: new ObjectID(this.requestedPostId)}, {$set: {title: this.formData.title, body: this.formData.body}})
+            resolve("success")
+        } else {
+            resolve("failure")
+        }
+    })
+}
+
 Post.reusablePostQuery = function(uniqueOperations, visitorId) {
     return new Promise(async function(resolve, reject) {
         
@@ -66,6 +103,8 @@ Post.reusablePostQuery = function(uniqueOperations, visitorId) {
         // Clean up author property in each post object
         posts = posts.map(function(post) {
             post.isVisitorOwner = post.authorId.equals(visitorId)
+
+            
             
             post.author = {
                 username: post.author.username,
@@ -73,6 +112,7 @@ Post.reusablePostQuery = function(uniqueOperations, visitorId) {
                 avatar: new User(post.author, true).avatar
             }
             
+
             return post
         })
         resolve(posts)
@@ -81,6 +121,7 @@ Post.reusablePostQuery = function(uniqueOperations, visitorId) {
 
 Post.findSingleById = function(id, visitorId) {
     
+
     return new Promise(async function(resolve, reject) {
         
         if (typeof(id) != "string" || !ObjectID.isValid(id)) {

@@ -18,11 +18,16 @@ app.use(flash())
 // Middleware. Express will run this before every express before the router
 app.use(function(req, res, next) {
 
+    // make all error and success flash messages available from all templates
+    res.locals.errors = req.flash("errors")
+    res.locals.success = req.flash("success")
+
     // make current user id available on the req object
     if (req.session.sessionUser) {req.visitorId = req.session.sessionUser._id } else {req.visitorId = 0}
-
+    
     // Make user data available to any .ejs files
     res.locals.user = req.session.sessionUser
+    
     next()
 })
 
