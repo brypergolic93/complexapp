@@ -121,8 +121,6 @@ Post.reusablePostQuery = function(uniqueOperations, visitorId) {
 
 Post.findSingleById = function(id, visitorId) {
     
-
-    console.log(this)
     return new Promise(async function(resolve, reject) {
         
         if (typeof(id) != "string" || !ObjectID.isValid(id)) {
