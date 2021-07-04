@@ -41,6 +41,7 @@ exports.register = function(req, res) {
     let user = new User(req.body)
     user.register().then(() => {
         req.session.user = {username: user.userData.username, avatar: user.avatar, _id: user.userData._id}
+        req.flash("success", "Account successfully created.")
         req.session.save(function() {
             res.redirect('/')
         })

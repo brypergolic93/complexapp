@@ -1,6 +1,7 @@
 const postsCollection = require('../db').db().collection('posts')
 const ObjectID = require('mongodb').ObjectID
 const User = require('./User')
+const sanitizeHTML = require('sanitize-html')
 
 let Post = function(data, userid, requestedPostId) {
     this.formData = data 
@@ -9,17 +10,14 @@ let Post = function(data, userid, requestedPostId) {
     this.requestedPostId = requestedPostId
 }
 
-
-
-
 Post.prototype.cleanUp = function() {
     if (typeof(this.formData.title) != "string") {this.data.title = ""}
     if (typeof(this.formData.body) != "string") {this.data.body = ""}
     
     // get rid of bogus properties
     this.formData = {
-        title: this.formData.title.trim(),
-        body: this.formData.body.trim(),
+        title: sanitizeHTML(this.formData.title.trim(), {allowedTabs: [], allowedAttributes: []}),
+        body: sanitizeHTML(this.formData.body.trim(), {allowedTabs: [], allowedAttributes: []}),
         createdDate: new Date(),
         author: ObjectID(this.sessionUserId)
     }
@@ -30,7 +28,6 @@ Post.prototype.validate = function() {
     if (this.formData.body == "") {this.errors.push("Please enter post content.")}
 }
 
-
 Post.prototype.create = function() {
     return new Promise((resolve, reject) => {
         
@@ -39,8 +36,9 @@ Post.prototype.create = function() {
 
         if (!this.errors.length) {
             // Save post into database
-            postsCollection.insertOne(this.formData).then(() => {
-                resolve()
+            postsCollection.insertOne(this.formData).then((info) => {
+                // Mongodb will have an array called ops
+                resolve(info.ops[0]._id)
             }).catch(() => {
                 this.errors.push("Database server is down. Please try again later.")
             })
@@ -145,6 +143,22 @@ Post.findByAuthorId = function(authorId) {
         { $match: {author: authorId} },
         { $sort: {createdDate: -1} }
     ])
+}
+
+Post.delete = function(postIdToDelete, currentUserId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let post = await Post.findSingleById(postIdToDelete, currentUserId)
+            if (post.isVisitorOwner) {
+                await postsCollection.deleteOne({_id: new ObjectID(postIdToDelete)})
+                resolve()
+            } else {
+                reject()
+            }
+        } catch {
+
+        }
+    })
 }
 
 module.exports = Post

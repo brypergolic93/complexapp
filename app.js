@@ -2,7 +2,9 @@ const express = require('express')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
 const flash = require('connect-flash')
+const markdown = require('marked')
 const app = express()
+const sanitizeHTML = require('sanitize-html')
 
 let sessionOptions = session({
     secret: "JavaScipt is fucking sick",
@@ -17,6 +19,11 @@ app.use(flash())
 
 // Middleware. Express will run this before every express before the router
 app.use(function(req, res, next) {
+    // make our markdown function available from within EJS templates
+    // sanitize any HTML input by the user to only allow basic syntax
+    res.locals.filterUserHTML = function (content) {
+        return sanitizeHTML(markdown(content), {allowedTags: ['p', 'br', 'ul', 'ol', 'li', 'strong', 'bold', 'i', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'], allowedAttributes: {}})
+    }
 
     // make all error and success flash messages available from all templates
     res.locals.errors = req.flash("errors")
